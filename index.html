@@ -1,0 +1,75 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.4.1/d3.min.js"></script>
+    <script src="https://cdn.rawgit.com/zcanter/aframe-scatterplot/master/dist/a-scatterplot.min.js"></script>
+    <!-- orbit-controls -->
+    <script src="//cdn.rawgit.com/tizzle/aframe-orbit-controls-component/master/dist/aframe-orbit-controls-component.min.js"></script>
+    <!-- wasd-controls -->
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v3.7.0/dist/aframe-extras.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+      <a-entity rotation="0 90 0">
+        <a-scatterplot line="start: -0.06593725135199813, -0.022338808438985724, -0.046025399083270205; end: -0.0643846113199396 -0.021324456856536445 -0.021324456856536445; color: red; visible: true" src="url(curves.json)" title="Test" x="x" y="y" z="z" val="z" colorpreset="jet" showFloor="true"  relationship="xz" ylimit="0.2" scale="6 6 6" pointsize="10"></a-scatterplot>
+        <a-entity id="target" geometry="primitive: box" scale="0.1 0.1 0.1" position="3 0 2" material="color: #cc0000; visible:false"></a-entity>
+        <a-entity id="lines" >
+
+        </a-entity>
+      </a-entity>
+      <a-sky></a-sky>
+
+      
+    </a-scene>
+    <script>
+
+      // const coordPairs = [
+      //   [{
+      //     "x": -0.06593725135199813, "y": -0.022338808438985724, "z": -0.046025399083270205
+      //   },
+      //   {
+      //     "x": -0.0643846113199396, "y": -0.021324456856536445, "z": -0.04535541594681902
+      //   }]
+      // ];
+
+      const getPairs = async () => {
+        const coord_pairs = await fetch('curves.json')
+          .then(response => response.text())
+          .then(text => {
+            const coords = JSON.parse(text);
+            let pairs = []
+            for (let i = 0; i < coords.length - 2; i++) {
+              pairs.push([coords[i], coords[i+1]])
+            }
+            return pairs;
+          });
+        return coord_pairs;
+      };
+
+      const generateLines = (coord_pairs) => {
+        let lines = [];
+        coord_pairs.forEach((coord_pair, _) => {
+            const start_coord = coord_pair[0];
+            const end_coord = coord_pair[1];
+            const line = `line="start: ${start_coord.x}, ${start_coord.y}, ${start_coord.z}; ` +
+                        `end: ${end_coord.x} ${end_coord.y} ${end_coord.y}; ` +
+                        `color: red"`;
+            lines.push(line);
+        });
+
+        return lines;
+      };
+
+      getPairs()
+        .then((coordPairs) => {
+          const line_el = document.getElementById("lines");
+          const lines = generateLines(coordPairs);
+          const att = "line";
+          const att_value = lines[0].split("=")[1];     
+          console.log(att, att_value);    
+          // line_el.setAttribute("line", "start: -0.06593725135199813, -0.022338808438985724, -0.046025399083270205; end: -0.0643846113199396 -0.021324456856536445 -0.021324456856536445; color: red");
+        });
+      
+    </script>
+  </body>
+</html>
