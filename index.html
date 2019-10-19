@@ -1,9 +1,9 @@
 <html>
   <head>
     <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
-    <!-- <script src="https://rawgit.com/protyze/aframe-curve-component/master/dist/aframe-curve-component.min.js"></script> -->
-    <!-- <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script> -->
-    <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-curve-component/master/dist/aframe-curve-component.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script>
+    <!-- <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script> -->
     <!-- wasd-controls -->
     <script>
         var bind = AFRAME.utils.bind;
@@ -219,8 +219,8 @@
     </script>
   </head>
   <body>
-    <a-scene>
-        <a-camera position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
+    <a-scene id="test">
+        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
@@ -229,46 +229,72 @@
     </a-scene>
     <script>
 
-      const getCurvePoints = () => {
-        return fetch('data/curves.json')
-          .then(response => response.text())
-          .then(text => {
-            const coords = JSON.parse(text);
-            const curvePoints = [];
-            coords.forEach((coord, _) => {
-                const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
-                curvePoints.push(curvePoint);
-            });  
-            return curvePoints;
-          });
-      }
+        const getCameraTrajectory = () => {
+            return fetch('data/curves.json')
+                .then(response => response.text())
+                .then(text => {
+                    const coords = JSON.parse(text);
+                    const positions = [];
+                    coords.forEach((coord, _) => {
+                        const position = `${coord.x} ${coord.y} ${coord.z}`;
+                        positions.push(position);
+                    });
+                    return positions;
+                });
+        }
 
-      const getCells = () => {
-          return fetch('data/cells.json')
+        const getCurvePoints = () => {
+            return fetch('data/curves.json')
             .then(response => response.text())
             .then(text => {
-                const cell_points = JSON.parse(text);
-                const cells = [];
-                cell_points.forEach((cell_point, _) => {
-                    const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
-                    cells.push(stream_cell);
-                })
-                return cells;
+                const coords = JSON.parse(text);
+                const curvePoints = [];
+                coords.forEach((coord, _) => {
+                    const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
+                    curvePoints.push(curvePoint);
+                });  
+                return curvePoints;
             });
-      }
+        }
 
-      getCurvePoints()
-        .then((curvePoints) => {
-          const curve_el = document.getElementById("track1");
-          curve_el.innerHTML = curvePoints.join(" ");
+        const getCells = () => {
+            return fetch('data/cells.json')
+                .then(response => response.text())
+                .then(text => {
+                    const cell_points = JSON.parse(text);
+                    const cells = [];
+                    cell_points.forEach((cell_point, _) => {
+                        const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
+                        cells.push(stream_cell);
+                    })
+                    return cells;
+                });
+        }
+
+        getCurvePoints()
+            .then((curvePoints) => {
+            const curve_el = document.getElementById("track1");
+            curve_el.innerHTML = curvePoints.join(" ");
+            });
+
+        getCells()
+            .then((cells) => {
+            const cell_el = document.getElementById("cells");
+            cell_el.innerHTML = cells.join(" ");
+            });
+
+
+        const scene = document.getElementById("test");   
+        let clickCount = 0; 
+        scene.addEventListener("click", () => {
+            getCameraTrajectory()
+                .then((positions) => {
+                    const camera_el = document.getElementById("curve-camera");
+                    position = positions[clickCount];
+                    camera_el.setAttribute("position", position);
+                    clickCount = clickCount + 1;        
+            });
         });
-
-      getCells()
-        .then((cells) => {
-          const cell_el = document.getElementById("cells");
-          cell_el.innerHTML = cells.join(" ");
-        });
-
     
     </script>
   </body>
