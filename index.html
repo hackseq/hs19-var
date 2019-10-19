@@ -220,7 +220,7 @@
   </head>
   <body>
     <a-scene>
-        <a-camera position="-1.2 0 1" look-controls wasd-controls></a-camera>
+        <a-camera position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
