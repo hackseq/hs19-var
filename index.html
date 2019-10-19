@@ -220,7 +220,12 @@
   </head>
   <body>
     <a-scene id="test">
-        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
+        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20">
+          <!-- <a-entity position="0 0 -3"
+        geometry="primitive: ring; radiusInner: 0.2; radiusOuter: 0.3;"
+        material="color: cyan; shader: flat"
+        cursor="maxDistance: 30; fuse: true"> -->
+        </a-camera>
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
@@ -242,6 +247,13 @@
                     return positions;
                 });
         }
+        // get positions only once to prevent recomputation/refetching the JSON.
+        let positions = [];
+        getCameraTrajectory().then((positionsSource) => {
+          positions = positionsSource;
+          console.error(positions);
+        });
+        console.log(positions);
 
         const getCurvePoints = () => {
             return fetch('data/curves.json')
@@ -252,7 +264,7 @@
                 coords.forEach((coord, _) => {
                     const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
                     curvePoints.push(curvePoint);
-                });  
+                });
                 return curvePoints;
             });
         }
@@ -284,18 +296,58 @@
             });
 
 
-        const scene = document.getElementById("test");   
-        let clickCount = 0; 
+        const scene = document.getElementById("test");
+
+        // Consant movement along the path
+        let progressIndex = 0;
+        // possible states:
+        //  -1: moveBackward
+        //  0: stop
+        //  1: moveForward
+        const statesEnum = [0, 1, 0, -1];
+        let clickCount = 0;
+        let movingFactor = 0;
+        let timeInterval = 40;
+
+        const initiateMovement = (timeStep) => {
+          setInterval(() => {
+            updateMovement();
+            console.log("variables!", progressIndex, statesEnum, clickCount, movingFactor);
+          }, timeStep);
+        }
+        initiateMovement(timeInterval);
+
+        // set functionality that will happen on every click
         scene.addEventListener("click", () => {
-            getCameraTrajectory()
-                .then((positions) => {
-                    const camera_el = document.getElementById("curve-camera");
-                    position = positions[clickCount];
-                    camera_el.setAttribute("position", position);
-                    clickCount = clickCount + 1;        
-            });
+          updateMovementFactor();
         });
-    
+
+        const updateMovementFactor = () => {
+          // update the progress index based on the current value
+          clickCount++;
+          movingFactor = statesEnum[clickCount % statesEnum.length];
+        }
+
+        const updateMovement = () => {
+          const camera_el = document.getElementById("curve-camera");
+          if (isMoving() && isStayWithinBounds()) {
+            progressIndex += movingFactor;
+            position = positions[progressIndex];
+            //  set new camera position to the next position
+            camera_el.setAttribute("position", position);
+          }
+        }
+
+        // Movement helpers to check when to update movement
+        const isMoving = () => {
+          return movingFactor != 0;
+        }
+
+        const isStayWithinBounds = () => {
+          // checks if we're not beyond the end of the positions, and we are not at risk of going less than 0.
+          return progressIndex < positions.length && !(progressIndex == 0 && movingFactor < 0);
+        }
+
     </script>
   </body>
 </html>
