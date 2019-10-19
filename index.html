@@ -220,12 +220,16 @@
   </head>
   <body>
     <a-scene>
-        <a-camera position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
+        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20">
+                  <a-cursor id="cursor"></a-cursor>
+        </a-camera>
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
         <a-entity position="0 0 0" id="cells"></a-entity>
         <a-sky></a-sky>
+        <a-plane position="0 0 0" rotation="0 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
+        <a-entity light="type: directional; color: #AFA; intensity: 2.5" position="0 0 1"></a-entity>
     </a-scene>
     <script>
 
@@ -238,7 +242,7 @@
             coords.forEach((coord, _) => {
                 const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
                 curvePoints.push(curvePoint);
-            });  
+            });
             return curvePoints;
           });
       }
@@ -269,7 +273,7 @@
           cell_el.innerHTML = cells.join(" ");
         });
 
-    
+
     </script>
   </body>
 </html>
