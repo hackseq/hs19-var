@@ -1,8 +1,19 @@
 ## hackseq19 - TEAM 15: Virtual and Augmented Reality for Single-Cell Data Exploration.*
 
-## Project Description
-
 ### Final product website: http://www.singlecellvr.com
+
+![http://www.singlecellvr.com](images/scvr.jpeg)
+
+**NOTE**:  VR Headset device required. <a href = 'https://arvr.google.com/cardboard/'>Google Cardboard</a> is currently the primarily supported headset for this data visualization software.
+
+### Directions
+**Step 1**: Upload your single cell trajectory data in .csv format - this is the default product of the <a href = 'http://stream.pinellolab.partners.org/'>STREAM</a> web tool. singlecellvr.com converts this data into a format built for the VR visualization space. (*example data pre-loaded in this vignette*).
+
+**Step 2**: Click the link *on your mobile device* to open the VR space and explore your data.
+
+**Step 3**: Interact with your data by using the signature *Google Cardboard*  one-button interface.
+
+## Notes on production and Project Description
 
 ### Goal / Vision:
 - Visualize high-tech single-cell RNA-seq experiments at a life-size scale in 3-D
@@ -36,7 +47,7 @@
     A. https://www.npmjs.com/package/aframe-scatterplot  
     B. https://github.com/bryik/aframe-scatter-component  
     C. https://github.com/zcanter/aframe-scatterplot
-  
+
 4. STREAM Paper (open access): https://www.nature.com/articles/s41467-019-09670-4
 
 5. STREAM website: http://stream.pinellolab.partners.org/
