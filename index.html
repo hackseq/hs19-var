@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <head>
   <title>My A-Frame Scene</title>
   <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
@@ -22,3 +23,60 @@
     <a-scatterplot src="url(example.json)" x="field1" y="field2" z="field3" val="field4"></a-scatterplot>
   </a-scene>
 </body>
+=======
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+  </head>
+  <body>
+    <a-scene>
+        <a-camera wasd-controls="acceleration:20" position="-1.2 0 1" ></a-camera>
+        <a-entity position="0 0 0" id="cells"></a-entity>
+        <a-sky></a-sky>
+    </a-scene>
+    <script>
+
+      const getCurvePoints = () => {
+        return fetch('curves.json')
+          .then(response => response.text())
+          .then(text => {
+            const coords = JSON.parse(text);
+            const curvePoints = [];
+            coords.forEach((coord, _) => {
+                const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
+                curvePoints.push(curvePoint);
+            });  
+            return curvePoints;
+          });
+      }
+
+      const getCells = () => {
+          return fetch('data/cells.json')
+            .then(response => response.text())
+            .then(text => {
+                const cell_points = JSON.parse(text);
+                const cells = [];
+                cell_points.forEach((cell_point, _) => {
+                    const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
+                    cells.push(stream_cell);
+                })
+                return cells;
+            });
+      }
+      
+    //   getCurvePoints()
+    //     .then((curvePoints) => {
+    //       const curve_el = document.getElementById("track1");
+    //       curve_el.innerHTML = curvePoints.join(" ");
+    //     });
+      
+      getCells()
+        .then((cells) => {
+          const cell_el = document.getElementById("cells");
+          cell_el.innerHTML = cells.join(" ");
+        });
+
+    </script>
+  </body>
+</html>
+>>>>>>> bd81f1e4f02db556f216c9c69873e414643b099c
