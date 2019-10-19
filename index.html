@@ -219,7 +219,7 @@
   </head>
   <body>
     <a-scene id="test">
-        <a-camera id="curve-camera" position="-1.2 0 1" look-controls stream-wasd-controls="acceleration: 20"></a-camera>
+        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
@@ -227,6 +227,9 @@
         <a-sky></a-sky>
     </a-scene>
     <script>
+
+        states = ["stop", "forward", "stop", "backward"]
+        currentState = "";
 
         const getCameraTrajectory = () => {
             return fetch('data/curves.json')
@@ -286,14 +289,28 @@
         const scene = document.getElementById("test");   
         let clickCount = 0; 
         scene.addEventListener("click", () => {
-            getCameraTrajectory()
-                .then((positions) => {
-                    const camera_el = document.getElementById("curve-camera");
-                    position = positions[clickCount];
-                    camera_el.setAttribute("position", position);
-                    clickCount = clickCount + 1;        
-            });
+            currentState = states[clickCount % states.length];
+            clickCount = clickCount + 1;        
         });
+
+        let positionIndex = 0
+        const moveForward = (positions) => {
+            if (positionIndex !== positions.length) {
+                const camera_el = document.getElementById("curve-camera");
+                position = positions[positionIndex];
+                camera_el.setAttribute("position", position);
+                positionIndex = positionIndex + 1; 
+            }
+        }
+
+        const moveBackward = (positions) => {
+            if (positionIndex !== 0) {
+                const camera_el = document.getElementById("curve-camera");
+                position = positions[positionIndex];
+                camera_el.setAttribute("position", position);
+                positionIndex = positionIndex - 1; 
+            }
+        }
 
         document.addEventListener("keydown", event => {
             if (event.keyCode === 38) {
@@ -315,6 +332,20 @@
                 });
             }
         });
+
+        getCameraTrajectory()
+            .then(positions => {
+                setInterval(() => {
+                    console.log(currentState);
+                    if (currentState === "forward") {
+                        moveForward(positions);
+                    }
+                    else if (currentState === "backward") {
+                        moveBackward(positions);
+                    }
+                }, 1000);
+            });
+        
     
     </script>
   </body>
