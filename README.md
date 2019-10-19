@@ -33,10 +33,10 @@
 2. A-FRAME: https://aframe.io
 3. The following options for 3-D scatterplot implementations
 
-  A. https://www.npmjs.com/package/aframe-scatterplot
-
-  B. https://github.com/bryik/aframe-scatter-component
-
-  C. https://github.com/zcanter/aframe-scatterplot
+    A. https://www.npmjs.com/package/aframe-scatterplot  
+    B. https://github.com/bryik/aframe-scatter-component  
+    C. https://github.com/zcanter/aframe-scatterplot
+  
 4. STREAM Paper (open access): https://www.nature.com/articles/s41467-019-09670-4
+
 5. STREAM website: http://stream.pinellolab.partners.org/
