@@ -224,7 +224,7 @@
         <a-curve id="track1"></a-curve>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
-        <a-entity id="circles"></a-entity>
+        <a-entity position="0 0 0" id="cells"></a-entity>
         <a-sky></a-sky>
     </a-scene>
     <script>
@@ -243,12 +243,33 @@
           });
       }
 
+      const getCells = () => {
+          return fetch('data/cells.json')
+            .then(response => response.text())
+            .then(text => {
+                const cell_points = JSON.parse(text);
+                const cells = [];
+                cell_points.forEach((cell_point, _) => {
+                    const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
+                    cells.push(stream_cell);
+                })
+                return cells;
+            });
+      }
+
       getCurvePoints()
         .then((curvePoints) => {
           const curve_el = document.getElementById("track1");
           curve_el.innerHTML = curvePoints.join(" ");
         });
-      
+
+      getCells()
+        .then((cells) => {
+          const cell_el = document.getElementById("cells");
+          cell_el.innerHTML = cells.join(" ");
+        });
+
+    
     </script>
   </body>
 </html>
