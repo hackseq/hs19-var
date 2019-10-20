@@ -238,29 +238,43 @@
         }
       });
       </script>
-      <script>
-      AFRAME.registerComponent('hover-text', {
-        schema: {
-          value: {default: ''}
-        },
+      <script>AFRAME.registerComponent("name-on-hover", {
+  schema: {
+    target: {
+      type: "selector",
+      default: ""
+    }
+  },
+  init: function() {
+    var target = this.data.target;
+    var el = this.el;
+    this.setupNamePos();
+    el.addEventListener("mouseenter", function() {
+      target.emit("in"); // animate in
+    });
+    el.addEventListener("mouseleave", function() {
+      target.emit("out"); // animate out
+    });
+  },
+  setupNamePos: function() {
+    var name = this.data.target; // get name element
+    var elPos = this.el.getAttribute("position"); // get the pos of hovered element
 
-        init: function () {
-          var data = this.data;
-          var el = this.el;
-
-          el.addEventListener('mouseenter', function () {
-            el.setAttribute('text', {content: data.content});
-          });
-        }
-      });
-      </script>
+    name.setAttribute("position", {
+      //set name position relevant to hovered element
+      x: elPos.x,
+      y: elPos.y + 2,
+      z: elPos.z
+    });
+  }
+});</script>
   </head>
   <body>
 
     <a-scene background="color: #AAB" fog="type: linear; color: #AAB; far: 30; near: 0">
         <a-curve id="track1"></a-curve>
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
-        <a-entity position="0 0 0" id="cells" rotation="0 360 0"></a-entity>
+        <a-entity position="0 0 0" id="cells"></a-entity>
         <a-sky></a-sky>
 <!--         <a-box position="0 0 0" rotation="0 45 0" color="#4CC3D9" change-color-on-hover="color: red"></a-box> -->
         <a-camera zoom="5" position="0 0 0" look-controls wasd-controls="acceleration: 5">
@@ -295,7 +309,8 @@
               const cells = [];
               cell_points.forEach((cell_point, _) => {
                   const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color1}"
-                    change-color-on-hover="color: ${cell_point.color2}" hover-text="value: ${cell_point.cell_type}" radius=".001"></a-sphere>`;
+                    change-color-on-hover="color: ${cell_point.color2}" name-on-hover="target: ${cell_point.cell_type}" radius=".001">
+                    </a-sphere>`;
                   cells.push(stream_cell);
               })
               return cells;
@@ -319,3 +334,4 @@
 </html>
 <!-- https://stackoverflow.com/questions/42495751/a-sphere-show-text-on-mouse-over-or-attach-a-text-to-a-sphere -->
 <!-- https://stackoverflow.com/questions/45290933/show-text-on-mouse-over-of-a-sphere -->
+<!-- name-on-hover="target: #myTarget" -->
