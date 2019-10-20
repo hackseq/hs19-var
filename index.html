@@ -228,26 +228,27 @@
   <body>
 
     <a-scene>
-        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20">
+        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 0.5">
                 <!-- Scope/cursor remains centered on screen at all times -->
-                  <a-cursor id="cursor"></a-cursor>
+	        <a-cursor id="cursor"></a-cursor>
         </a-camera>
-        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20"></a-camera>
+        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 0.5"></a-camera>
 
         <a-curve id="track1"></a-curve>
 
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
-        <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
+        <a-draw-curve curveref="#track1" material="shader: line; color: blue; width: 10"></a-draw-curve>
         <a-entity position="0 0 0" id="cells"></a-entity>
 	
 	<!-- adding a backdrop -->
-	<a-entity environment="skyType: atmosphere; skyControl: #FFFFFF; groundTexture: checkerboard; groundColor: #f3f3f2; groundColor2: #e7e74; shadow: on; dressing: cylinder; dressingAmount: 15; dressingColor: #7c5c45; grid: xlines; gridColor: #000000"></a-entity>
+	<a-entity environment="skyType: atmosphere; skyControl: #FFFFFF; ground: hills; groundTexture: checkerboard; groundColor: #c9c4c4; groundColor2: #c9c4c4; shadow: on; shadowSize: 0.1; dressing: cylinder; dressingAmount: 10; dressingColor: #228B22; grid: xlines; gridColor: #228B22"></a-entity>
         
 	<!-- Adding 2 planes and a light source for orientation clarity  -->
-        <a-plane position="0 0 -0.5" rotation="0 0 0" width="1" height="1" color="#a0d6d6" transparent="true" opacity="0.5" material="side: double"></a-plane>
-	<a-plane position="0 -0.1 -0.1" rotation="-90 0 0" width="1" height="1" color="#a0d6d6" transparent="true" opacity="0.5" material="side: double"></a-plane>
+        <a-plane position="0 0 0.5" rotation="0 0 0" width="1000" height="1000" color="#a0d6d6" transparent="true" opacity="0.3" material="side: double"></a-plane>
+	<a-plane position="0 -1 -0.1" rotation="-90 0 0" width="1000" height="1000" color="#c9c4c4" transparent="true" opacity="0.85" material="side: double"></a-plane>
+
+        <a-entity light="type: ambient; intensity: 1" position="0 0 1"></a-entity>
 	
-        <a-entity light="type: directional; color: #AFA; intensity: 2.4" position="0 0 1"></a-entity>
     </a-scene>
     <script>
 
