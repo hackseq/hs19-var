@@ -2,6 +2,9 @@
 
 ### Final product website: http://www.singlecellvr.com
 
+
+![http://www.singlecellvr.com](images/SCVR_logo.png)
+
 ![http://www.singlecellvr.com](images/scvr.jpeg)
 
 **NOTE**:  VR Headset device required. <a href = 'https://arvr.google.com/cardboard/'>Google Cardboard</a> is currently the primarily supported headset for this data visualization software.
@@ -26,7 +29,7 @@
 ### How are we visualizing this?
 - We are writing a suite of virtual reality software that is accessible to the user from our website, www.singlecellvr.com.
 
-#### Team Leads: Michael Vinyard, Luca Pinello, PhD
+#### Team Leads: Michael Vinyard & Luca Pinello
 
 #### Team Members:
 - Huidong Chen
@@ -38,16 +41,3 @@
 - Sepand Dyanatkar Motaghed
 - Mehul Sharma
 - David Stein
-
-#### Useful links (for team use):
-1. Team 15 Github Repo: https://github.com/hackseq/hs19-var
-2. A-FRAME: https://aframe.io
-3. The following options for 3-D scatterplot implementations
-
-    A. https://www.npmjs.com/package/aframe-scatterplot  
-    B. https://github.com/bryik/aframe-scatter-component  
-    C. https://github.com/zcanter/aframe-scatterplot
-
-4. STREAM Paper (open access): https://www.nature.com/articles/s41467-019-09670-4
-
-5. STREAM website: http://stream.pinellolab.partners.org/
