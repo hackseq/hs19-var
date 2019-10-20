@@ -29,10 +29,10 @@
 ### How are we visualizing this?
 - We are writing a suite of virtual reality software that is accessible to the user from our website, www.singlecellvr.com.
 
-#### Team Leads: Michael Vinyard & Luca Pinello
+#### Team Leads: Michael Vinyard (@vinyard_m) & Luca Pinello ( @lucapinello & pinellolab.org)
 
 #### Team Members:
-- Huidong Chen
+- Huidong Chen 
 - Michelle Crown
 - Alexander Dungate
 - Fatih Karaoglanoglu
