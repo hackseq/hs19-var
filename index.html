@@ -1,11 +1,13 @@
 <html>
   <head>
     <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+
     <!-- <script src="https://rawgit.com/protyze/aframe-curve-component/master/dist/aframe-curve-component.min.js"></script> -->
     <!-- <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script> -->
     <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
     <!-- adding an environment -->
     <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+
     <!-- wasd-controls -->
     <script>
         var bind = AFRAME.utils.bind;
@@ -14,8 +16,7 @@
         var CLAMP_VELOCITY = 0.00001;
         var MAX_DELTA = 0.2;
         var KEYS = [
-            'KeyW', 'KeyA', 'KeyS', 'KeyD',
-            'ArrowUp', 'ArrowDown'
+            'KeyW', 'KeyA', 'KeyS', 'KeyD'
         ]
         AFRAME.registerComponent('stream-wasd-controls', {
         schema: {
@@ -227,12 +228,14 @@
   </head>
   <body>
 
+
     <a-scene>
         <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20">
                 <!-- Scope/cursor remains centered on screen at all times -->
                   <a-cursor id="cursor"></a-cursor>
         </a-camera>
         <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20"></a-camera>
+
 
         <a-curve id="track1"></a-curve>
 
@@ -267,31 +270,107 @@
 
       const getCells = () => {
           return fetch('data/cells.json')
+
             .then(response => response.text())
             .then(text => {
-                const cell_points = JSON.parse(text);
-                const cells = [];
-                cell_points.forEach((cell_point, _) => {
-                    const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
-                    cells.push(stream_cell);
-                })
-                return cells;
+                const coords = JSON.parse(text);
+                const curvePoints = [];
+                coords.forEach((coord, _) => {
+                    const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
+                    curvePoints.push(curvePoint);
+                });  
+                return curvePoints;
             });
-      }
+        }
 
-      getCurvePoints()
-        .then((curvePoints) => {
-          const curve_el = document.getElementById("track1");
-          curve_el.innerHTML = curvePoints.join(" ");
+        const getCells = () => {
+            return fetch('data/cells.json')
+                .then(response => response.text())
+                .then(text => {
+                    const cell_points = JSON.parse(text);
+                    const cells = [];
+                    cell_points.forEach((cell_point, _) => {
+                        const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
+                        cells.push(stream_cell);
+                    })
+                    return cells;
+                });
+        }
+
+        getCurvePoints()
+            .then((curvePoints) => {
+            const curve_el = document.getElementById("track1");
+            curve_el.innerHTML = curvePoints.join(" ");
+            });
+
+        getCells()
+            .then((cells) => {
+            const cell_el = document.getElementById("cells");
+            cell_el.innerHTML = cells.join(" ");
+            });
+
+
+        const scene = document.getElementById("test");   
+        let clickCount = 0; 
+        scene.addEventListener("click", () => {
+            currentState = states[clickCount % states.length];
+            clickCount = clickCount + 1;        
         });
 
-      getCells()
-        .then((cells) => {
-          const cell_el = document.getElementById("cells");
-          cell_el.innerHTML = cells.join(" ");
+        let positionIndex = 0
+        const moveForward = (positions) => {
+            if (positionIndex !== positions.length) {
+                const camera_el = document.getElementById("curve-camera");
+                position = positions[positionIndex];
+                camera_el.setAttribute("position", position);
+                positionIndex = positionIndex + 1; 
+            }
+        }
+
+        const moveBackward = (positions) => {
+            if (positionIndex !== 0) {
+                const camera_el = document.getElementById("curve-camera");
+                position = positions[positionIndex];
+                camera_el.setAttribute("position", position);
+                positionIndex = positionIndex - 1; 
+            }
+        }
+
+        document.addEventListener("keydown", event => {
+            if (event.keyCode === 38) {
+                getCameraTrajectory()
+                    .then((positions) => {
+                        const camera_el = document.getElementById("curve-camera");
+                        position = positions[clickCount];
+                        camera_el.setAttribute("position", position);
+                        clickCount = clickCount + 1;        
+                });
+            }
+            else if (event.keyCode === 40) {
+                getCameraTrajectory()
+                    .then((positions) => {
+                        const camera_el = document.getElementById("curve-camera");
+                        position = positions[clickCount];
+                        camera_el.setAttribute("position", position);
+                        clickCount = clickCount - 1;        
+                });
+            }
         });
 
 
+
+        getCameraTrajectory()
+            .then(positions => {
+                setInterval(() => {
+                    console.log(currentState);
+                    if (currentState === "forward") {
+                        moveForward(positions);
+                    }
+                    else if (currentState === "backward") {
+                        moveBackward(positions);
+                    }
+                }, 1000);
+            });
     </script>
   </body>
 </html>
