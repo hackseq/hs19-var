@@ -4,6 +4,8 @@
     <!-- <script src="https://rawgit.com/protyze/aframe-curve-component/master/dist/aframe-curve-component.min.js"></script> -->
     <!-- <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script> -->
     <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script>
+    <!-- adding an environment -->
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
     <!-- wasd-controls -->
     <script>
         var bind = AFRAME.utils.bind;
@@ -224,21 +226,27 @@
     </script>
   </head>
   <body>
+
     <a-scene>
         <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20">
                 <!-- Scope/cursor remains centered on screen at all times -->
                   <a-cursor id="cursor"></a-cursor>
         </a-camera>
+        <a-camera position="0 0 0" look-controls wasd-controls="acceleration: 20"></a-camera>
+
         <a-curve id="track1"></a-curve>
 
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
         <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
         <a-entity position="0 0 0" id="cells"></a-entity>
-        <a-sky></a-sky>
-
-        <!-- Adding 2 planes and a light source for orientation clarity  -->
-        <a-plane position="0 0.1 0.1" rotation="0 0 0" width="0.5" height="0.5" color="#000"></a-plane>
-        <a-plane position="0 -0.1 -0.1" rotation="-90 0 0" width="0.5" height="0.5" color="#000"></a-plane>
+	
+	<!-- adding a backdrop -->
+	<a-entity environment="skyType: atmosphere; skyControl: #FFFFFF; groundTexture: checkerboard; groundColor: #f3f3f2; groundColor2: #e7e74; shadow: on; dressing: cylinder; dressingAmount: 15; dressingColor: #7c5c45; grid: xlines; gridColor: #000000"></a-entity>
+        
+	<!-- Adding 2 planes and a light source for orientation clarity  -->
+        <a-plane position="0 0 -0.5" rotation="0 0 0" width="1" height="1" color="#a0d6d6" transparent="true" opacity="0.5" material="side: double"></a-plane>
+	<a-plane position="0 -0.1 -0.1" rotation="-90 0 0" width="1" height="1" color="#a0d6d6" transparent="true" opacity="0.5" material="side: double"></a-plane>
+	
         <a-entity light="type: directional; color: #AFA; intensity: 2.4" position="0 0 1"></a-entity>
     </a-scene>
     <script>
