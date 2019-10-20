@@ -21,8 +21,8 @@
     </a-scene>
     <script>
 
-        states = ["stop", "forward", "stop", "backward"]
-        currentState = "stop";
+        states = ["forward", "stop", "backward", "stop"]
+        currentState = "forward";
 
         const getCameraTrajectory = () => {
             return fetch('data/curves.json')
@@ -135,7 +135,7 @@
             }
         });
 
-        window.addEventListener("click", () => {
+        AFRAME.scenes[0].canvas.addEventListener("touchstart", () => {
             currentState = states[clickCount % states.length];
             clickCount = clickCount + 1;    
         })
