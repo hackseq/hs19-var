@@ -9,9 +9,13 @@
   <body>
     <a-scene id="test">
         <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20"></a-camera>
-        <a-curve id="track1"></a-curve>
+        <a-entity id="curve-container">
+
+        </a-entity>
         <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
-        <a-draw-curve curveref="#track1" material="shader: line; color: blue;"></a-draw-curve>
+        <a-entity id="curve-draw">
+
+        </a-entity>
         <a-entity position="0 0 0" id="cells"></a-entity>
         <a-sky></a-sky>
     </a-scene>
@@ -25,16 +29,33 @@
                 .then(response => response.text())
                 .then(text => {
                     const coords = JSON.parse(text);
-                    const rotations = [];
+                    const forward_rotations = [];
+                    const backward_rotations = [];
                     const positions = [];
                     coords.forEach((coord, _) => {
                         const position = `${coord.x} ${coord.y} ${coord.z}`;
                         positions.push(position);
-                        const rotation = coord.rotation.join(" ");
-                        rotations.push(rotation);
+                        const forward_rotation = coord.rotation_fw.join(" ");
+                        forward_rotations.push(forward_rotation);
+                        const backward_rotation = coord.rotation_bw.join(" ");
+                        backward_rotations.push(backward_rotation);
                     });
-                    return [positions, rotations];
+                    return [positions, forward_rotations, backward_rotations];
                 });
+        }
+
+        const groupBy = (list, keyGetter) => {
+            const map = new Map();
+            list.forEach((item) => {
+                const key = keyGetter(item);
+                const collection = map.get(key);
+                if (!collection) {
+                    map.set(key, [item]);
+                } else {
+                    collection.push(item);
+                }
+            });
+            return map;
         }
 
         const getCurvePoints = () => {
@@ -42,13 +63,39 @@
             .then(response => response.text())
             .then(text => {
                 const coords = JSON.parse(text);
-                const curvePoints = [];
+                const grouped_coords = groupBy(coords, coord => coord.branch_id);
+                const branches = [];
                 coords.forEach((coord, _) => {
-                    const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
-                    curvePoints.push(curvePoint);
-                });  
-                return curvePoints;
+                    if (!branches.includes(coord.branch_id)) {
+                        branches.push(coord.branch_id);
+                    }
+                });
+                
+                const branch_els = []
+                const branch_draw_els = []
+                branches.forEach((branch, _) => {
+                    const branch_el = `<a-curve id="${branch}"></a-curve>`;
+                    branch_els.push(branch_el);
+                    const branch_draw_el = `<a-draw-curve curveref="#${branch}" material="shader: line; color: blue;"></a-draw-curve>`;
+                    branch_draw_els.push(branch_draw_el);
+                });
+
+                const branch_container_el = document.getElementById("curve-container");
+                branch_container_el.innerHTML = branch_els.join(" ");
+                const branch_draw_container = document.getElementById("curve-draw");
+                branch_draw_container.innerHTML = branch_draw_els.join(" ");
+
+                return grouped_coords;
             });
+        }
+
+        const createBranchPoints = (coords) => {
+            const curvePoints = [];
+            coords.forEach((coord, _) => {
+                const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
+                curvePoints.push(curvePoint);
+            });  
+            return curvePoints;
         }
 
         const getCells = () => {
@@ -66,9 +113,12 @@
         }
 
         getCurvePoints()
-            .then((curvePoints) => {
-            const curve_el = document.getElementById("track1");
-            curve_el.innerHTML = curvePoints.join(" ");
+            .then((grouped_coords) => {
+                grouped_coords.forEach((group, branch) => {
+                    const points = createBranchPoints(group);
+                    const branch_el = document.getElementById(branch);
+                    branch_el.innerHTML = points.join(" ")
+                });
             });
 
         getCells()
@@ -77,11 +127,8 @@
             cell_el.innerHTML = cells.join(" ");
             });
 
-
-        const scene = document.getElementById("test");   
         let clickCount = 1; 
         document.addEventListener("keydown", event => {
-            console.log(event.keyCode);
             if (event.keyCode === 13) {
                 currentState = states[clickCount % states.length];
                 clickCount = clickCount + 1;    
@@ -97,8 +144,8 @@
         const moveForward = (positions, rotations) => {
             if (positionIndex !== positions.length) {
                 const camera_el = document.getElementById("curve-camera");
-                position = positions[positionIndex];
-                rotation = rotations[positionIndex];
+                let position = positions[positionIndex];
+                let rotation = rotations[positionIndex];
                 camera_el.setAttribute("position", position);
                 camera_el.setAttribute("rotation", rotation);
                 positionIndex = positionIndex + 1; 
@@ -108,46 +155,25 @@
         const moveBackward = (positions, rotations) => {
             if (positionIndex !== 0) {
                 const camera_el = document.getElementById("curve-camera");
-                position = positions[positionIndex];
-                rotation = rotations[positionIndex];
+                let position = positions[positionIndex];
+                let rotation = rotations[positionIndex];
                 camera_el.setAttribute("position", position);
                 camera_el.setAttribute("rotation", rotation);
                 positionIndex = positionIndex - 1; 
             }
         }
 
-        // document.addEventListener("keydown", event => {
-        //     if (event.keyCode === 38) {
-        //         getCameraTrajectory()
-        //             .then((positions) => {
-        //                 const camera_el = document.getElementById("curve-camera");
-        //                 position = positions[clickCount];
-        //                 camera_el.setAttribute("position", position);
-        //                 clickCount = clickCount + 1;        
-        //         });
-        //     }
-        //     else if (event.keyCode === 40) {
-        //         getCameraTrajectory()
-        //             .then((positions) => {
-        //                 const camera_el = document.getElementById("curve-camera");
-        //                 position = positions[clickCount];
-        //                 camera_el.setAttribute("position", position);
-        //                 clickCount = clickCount - 1;        
-        //         });
-        //     }
-        // });
-
         const moveCamera = async () => {
-            const [positions, rotations] = await getCameraTrajectory();
+            const [positions, forward_rotations, backward_rotations] = await getCameraTrajectory();
             setInterval(() => {
                 console.log(currentState);
                 if (currentState === "forward") {
-                    moveForward(positions, rotations);
+                    moveForward(positions, forward_rotations);
                 }
                 else if (currentState === "backward") {
-                    moveBackward(positions, rotations);
+                    moveBackward(positions, backward_rotations);
                 }
-            }, 1000);
+            }, 300);
         }
         
         moveCamera();
