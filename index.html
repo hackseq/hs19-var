@@ -135,7 +135,7 @@
             }
         });
 
-        document.addEventListener("touchstart", () => {
+        window.addEventListener("touchstart", () => {
             currentState = states[clickCount % states.length];
             clickCount = clickCount + 1;    
         })
