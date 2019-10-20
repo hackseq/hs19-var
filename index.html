@@ -236,12 +236,15 @@
                 .then(response => response.text())
                 .then(text => {
                     const coords = JSON.parse(text);
+                    const rotations = [];
                     const positions = [];
                     coords.forEach((coord, _) => {
                         const position = `${coord.x} ${coord.y} ${coord.z}`;
                         positions.push(position);
+                        const rotation = coord.rotation.join(" ");
+                        rotations.push(rotation);
                     });
-                    return positions;
+                    return [positions, rotations];
                 });
         }
 
@@ -266,7 +269,7 @@
                     const cell_points = JSON.parse(text);
                     const cells = [];
                     cell_points.forEach((cell_point, _) => {
-                        const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".001" shadow></a-sphere>`;
+                        const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".0005" shadow></a-sphere>`;
                         cells.push(stream_cell);
                     })
                     return cells;
@@ -294,20 +297,24 @@
         });
 
         let positionIndex = 0
-        const moveForward = (positions) => {
+        const moveForward = (positions, rotations) => {
             if (positionIndex !== positions.length) {
                 const camera_el = document.getElementById("curve-camera");
                 position = positions[positionIndex];
+                rotation = rotations[positionIndex];
                 camera_el.setAttribute("position", position);
+                camera_el.setAttribute("rotation", rotation);
                 positionIndex = positionIndex + 1; 
             }
         }
 
-        const moveBackward = (positions) => {
+        const moveBackward = (positions, rotations) => {
             if (positionIndex !== 0) {
                 const camera_el = document.getElementById("curve-camera");
                 position = positions[positionIndex];
+                rotation = rotations[positionIndex];
                 camera_el.setAttribute("position", position);
+                camera_el.setAttribute("rotation", rotation);
                 positionIndex = positionIndex - 1; 
             }
         }
@@ -333,20 +340,20 @@
         //     }
         // });
 
-        getCameraTrajectory()
-            .then(positions => {
-                setInterval(() => {
-                    console.log(currentState);
-                    if (currentState === "forward") {
-                        moveForward(positions);
-                    }
-                    else if (currentState === "backward") {
-                        moveBackward(positions);
-                    }
-                }, 100);
-            });
+        const moveCamera = async () => {
+            const [positions, rotations] = await getCameraTrajectory();
+            setInterval(() => {
+                console.log(currentState);
+                if (currentState === "forward") {
+                    moveForward(positions, rotations);
+                }
+                else if (currentState === "backward") {
+                    moveBackward(positions, rotations);
+                }
+            }, 1000);
+        }
         
-    
+        moveCamera();
     </script>
   </body>
 </html>
