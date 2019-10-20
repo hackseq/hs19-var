@@ -220,7 +220,7 @@
   </head>
   <body>
     <a-scene id="test">
-        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20">
+        <a-camera id="curve-camera" position="0 0 1" look-controls wasd-controls="acceleration: 20">
           <!-- <a-entity position="0 0 -3"
         geometry="primitive: ring; radiusInner: 0.2; radiusOuter: 0.3;"
         material="color: cyan; shader: flat"
@@ -295,9 +295,14 @@
             cell_el.innerHTML = cells.join(" ");
             });
 
+        // Set functionality that will happen on every click
+        scene.addEventListener("click", () => {
+          updateMovementFactor();
+        });
 
         const scene = document.getElementById("test");
 
+        // Variables:
         // Consant movement along the path
         let progressIndex = 0;
         // possible states:
@@ -309,18 +314,15 @@
         let movingFactor = 0;
         let timeInterval = 40;
 
+        // Initialize the loop that will constantly update movement
         const initiateMovement = (timeStep) => {
           setInterval(() => {
             updateMovement();
             console.log("variables!", progressIndex, statesEnum, clickCount, movingFactor);
           }, timeStep);
         }
+        // Begin movement control routine
         initiateMovement(timeInterval);
-
-        // set functionality that will happen on every click
-        scene.addEventListener("click", () => {
-          updateMovementFactor();
-        });
 
         const updateMovementFactor = () => {
           // update the progress index based on the current value
@@ -342,7 +344,6 @@
         const isMoving = () => {
           return movingFactor != 0;
         }
-
         const isStayWithinBounds = () => {
           // checks if we're not beyond the end of the positions, and we are not at risk of going less than 0.
           return progressIndex < positions.length && !(progressIndex == 0 && movingFactor < 0);
