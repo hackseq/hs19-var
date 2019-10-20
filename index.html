@@ -33,6 +33,8 @@
                     const coords = JSON.parse(text);
                     const forward_rotations = [];
                     const backward_rotations = [];
+                    let curBranches = [];
+                    let parentBranches = [];
                     const positions = [];
                     coords.forEach((coord, _) => {
                         const position = `${coord.x} ${coord.y} ${coord.z}`;
@@ -41,8 +43,16 @@
                         forward_rotations.push(forward_rotation);
                         const backward_rotation = coord.rotation_bw.join(" ");
                         backward_rotations.push(backward_rotation);
-                    });
-                    return [positions, forward_rotations, backward_rotations];
+
+                        let branchID = coord.branch_id;
+                        console.log(branchID);
+                        let branchNum = branchID.split('_')[1].replace(/\D/g,'');
+                        curBranches.push(branchNum);
+                        let parentNum = branchID.split('_')[0].replace(/\D/g,'');
+                        parentBranches.push(parentNum);
+                      });
+                      console.log(curBranches, parentBranches);
+                      return [positions, forward_rotations, backward_rotations, curBranches, parentBranches];
                 });
         }
 
@@ -72,7 +82,7 @@
                         branches.push(coord.branch_id);
                     }
                 });
-                
+
                 const branch_els = []
                 const branch_draw_els = []
                 branches.forEach((branch, _) => {
@@ -129,55 +139,72 @@
             cell_el.innerHTML = cells.join(" ");
             });
 
-        let clickCount = 1; 
+        let clickCount = 1;
         document.addEventListener("keydown", event => {
             if (event.keyCode === 13) {
                 currentState = states[clickCount % states.length];
-                clickCount = clickCount + 1;    
+                clickCount = clickCount + 1;
             }
         });
 
         AFRAME.scenes[0].canvas.addEventListener("touchstart", () => {
             currentState = states[clickCount % states.length];
-            clickCount = clickCount + 1;    
+            clickCount = clickCount + 1;
         })
 
         let positionIndex = 0
-        const moveForward = (positions, rotations) => {
+        const moveForward = (positions, rotations, curBranches, parentBranches) => {
             if (positionIndex !== positions.length) {
                 const camera_el = document.getElementById("curve-camera");
-                let position = positions[positionIndex];
-                let rotation = rotations[positionIndex];
-                camera_el.setAttribute("position", position);
-                // camera_el.setAttribute("rotation", rotation);
-                positionIndex = positionIndex + 1; 
+                // branch detection; special functionality if branching
+                if (curBranches[positionIndex] !== curBranches[positionIndex+1]) {
+                  console.log("All the branch ids and parents", curBranches, parentBranches);
+                  console.log("Found a branch: ", positionIndex, positions[positionIndex]);
+                  let foundChildrenIndexes = positions.filter((pos, index)=> {
+                    return parentBranches[index] === curBranches[positionIndex] && curBranches[index] !== curBranches[index-1];
+                  });
+                  console.log("Found children: ", foundChildrenIndexes);
+                  // get a random childIndex
+                  let randomChildIndex = foundChildrenIndexes[Math.floor(Math.random() * foundChildrenIndexes.length)];
+                  console.log("Found children and selected: ", foundChildrenIndexes, randomChildIndex);
+                  let position = positions[positionIndex];
+                  let rotation = rotations[positionIndex];
+                  camera_el.setAttribute("position", position);
+                  // camera_el.setAttribute("rotation", rotation);
+                } else {
+                  let position = positions[positionIndex];
+                  let rotation = rotations[positionIndex];
+                  camera_el.setAttribute("position", position);
+                  // camera_el.setAttribute("rotation", rotation);
+                }
+                positionIndex = positionIndex + 1;
             }
         }
 
-        const moveBackward = (positions, rotations) => {
+        const moveBackward = (positions, rotations, curBranches, parentBranches) => {
             if (positionIndex !== 0) {
                 const camera_el = document.getElementById("curve-camera");
                 let position = positions[positionIndex];
                 let rotation = rotations[positionIndex];
                 camera_el.setAttribute("position", position);
                 // camera_el.setAttribute("rotation", rotation);
-                positionIndex = positionIndex - 1; 
+                positionIndex = positionIndex - 1;
             }
         }
 
         const moveCamera = async () => {
-            const [positions, forward_rotations, backward_rotations] = await getCameraTrajectory();
+            const [positions, forward_rotations, backward_rotations, curBranches, parentBranches] = await getCameraTrajectory();
             setInterval(() => {
                 console.log(currentState);
                 if (currentState === "forward") {
-                    moveForward(positions, forward_rotations);
+                    moveForward(positions, forward_rotations, curBranches, parentBranches);
                 }
                 else if (currentState === "backward") {
-                    moveBackward(positions, backward_rotations);
+                    moveBackward(positions, backward_rotations, curBranches, parentBranches);
                 }
-            }, 300);
+            }, 50);
         }
-        
+
         moveCamera();
     </script>
   </body>
