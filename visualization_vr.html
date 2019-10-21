@@ -1,0 +1,193 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.9.2/aframe.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-curve-component/master/dist/aframe-curve-component.min.js"></script>
+    <script src="https://rawgit.com/protyze/aframe-alongpath-component/master/dist/aframe-alongpath-component.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.1.0/dist/aframe-environment-component.min.js"></script>
+    <!-- <script src="https://unpkg.com/aframe-curve-component/dist/aframe-curve-component.min.js"></script> -->
+    <!-- wasd-controls -->
+  </head>
+  <body>
+    <a-scene id="test">
+        <a-camera id="curve-camera" position="-1.2 0 1" look-controls wasd-controls="acceleration: 20">
+            <a-cursor id="cursor"></a-cursor>
+        </a-camera>
+        <a-entity id="curve-container">
+
+        </a-entity>
+        <!-- <a-box alongpath="curve: #track1; loop: true"></a-box> -->
+        <a-entity id="curve-draw">
+
+        </a-entity>
+        <a-entity position="0 0 0" id="cells"></a-entity>
+
+        <a-entity environment="skyType: atmosphere; skyControl: #FFFFFF; ground: hills; groundTexture: checkerboard; groundColor: #c9c4c4; groundColor2: #c9c4c4; shadow: on; shadowSize: 0.1; dressing: cylinder; dressingAmount: 10; dressingColor: #228B22; grid: xlines; gridColor: #228B22"></a-entity>
+
+	    <!-- Adding 2 planes and a light source for orientation clarity  -->
+        <a-plane position="0 0 0.5" rotation="0 0 0" width="1000" height="1000" color="#a0d6d6" transparent="true" opacity="0.3" material="side: double"></a-plane>
+	    <a-plane position="0 -1 -0.1" rotation="-90 0 0" width="1000" height="1000" color="#c9c4c4" transparent="true" opacity="0.85" material="side: double"></a-plane>
+
+        <a-entity light="type: ambient; intensity: 1" position="0 0 1"></a-entity>
+
+    </a-scene>
+    <script>
+
+        states = ["forward", "stop", "backward", "stop"]
+        currentState = "forward";
+
+        const getCameraTrajectory = () => {
+            return fetch('data/curves.json')
+                .then(response => response.text())
+                .then(text => {
+                    const coords = JSON.parse(text);
+                    const forward_rotations = [];
+                    const backward_rotations = [];
+                    const positions = [];
+                    coords.forEach((coord, _) => {
+                        const position = `${coord.x} ${coord.y} ${coord.z}`;
+                        positions.push(position);
+                        const forward_rotation = coord.rotation_fw.join(" ");
+                        forward_rotations.push(forward_rotation);
+                        const backward_rotation = coord.rotation_bw.join(" ");
+                        backward_rotations.push(backward_rotation);
+                    });
+                    return [positions, forward_rotations, backward_rotations];
+                });
+        }
+
+        const groupBy = (list, keyGetter) => {
+            const map = new Map();
+            list.forEach((item) => {
+                const key = keyGetter(item);
+                const collection = map.get(key);
+                if (!collection) {
+                    map.set(key, [item]);
+                } else {
+                    collection.push(item);
+                }
+            });
+            return map;
+        }
+
+        const getCurvePoints = () => {
+            return fetch('data/curves.json')
+            .then(response => response.text())
+            .then(text => {
+                const coords = JSON.parse(text);
+                const grouped_coords = groupBy(coords, coord => coord.branch_id);
+                const branches = [];
+                coords.forEach((coord, _) => {
+                    if (!branches.includes(coord.branch_id)) {
+                        branches.push(coord.branch_id);
+                    }
+                });
+
+                const branch_els = []
+                const branch_draw_els = []
+                branches.forEach((branch, _) => {
+                    const branch_el = `<a-curve id="${branch}"></a-curve>`;
+                    branch_els.push(branch_el);
+                    const branch_draw_el = `<a-draw-curve curveref="#${branch}" material="shader: line; color: blue;"></a-draw-curve>`;
+                    branch_draw_els.push(branch_draw_el);
+                });
+
+                const branch_container_el = document.getElementById("curve-container");
+                branch_container_el.innerHTML = branch_els.join(" ");
+                const branch_draw_container = document.getElementById("curve-draw");
+                branch_draw_container.innerHTML = branch_draw_els.join(" ");
+
+                return grouped_coords;
+            });
+        }
+
+        const createBranchPoints = (coords) => {
+            const curvePoints = [];
+            coords.forEach((coord, _) => {
+                const curvePoint = `<a-curve-point position="${coord.x} ${coord.y} ${coord.z}"></a-curve-point>`;
+                curvePoints.push(curvePoint);
+            });
+            return curvePoints;
+        }
+
+        const getCells = () => {
+            return fetch('data/cells.json')
+                .then(response => response.text())
+                .then(text => {
+                    const cell_points = JSON.parse(text);
+                    const cells = [];
+                    cell_points.forEach((cell_point, _) => {
+                        const stream_cell = `<a-sphere position="${cell_point.x} ${cell_point.y} ${cell_point.z}" color="${cell_point.color}" radius=".0005" shadow></a-sphere>`;
+                        cells.push(stream_cell);
+                    })
+                    return cells;
+                });
+        }
+
+        getCurvePoints()
+            .then((grouped_coords) => {
+                grouped_coords.forEach((group, branch) => {
+                    const points = createBranchPoints(group);
+                    const branch_el = document.getElementById(branch);
+                    branch_el.innerHTML = points.join(" ")
+                });
+            });
+
+        getCells()
+            .then((cells) => {
+            const cell_el = document.getElementById("cells");
+            cell_el.innerHTML = cells.join(" ");
+            });
+
+        let clickCount = 1;
+        document.addEventListener("keydown", event => {
+            if (event.keyCode === 13) {
+                currentState = states[clickCount % states.length];
+                clickCount = clickCount + 1;
+            }
+        });
+
+        AFRAME.scenes[0].canvas.addEventListener("touchstart", () => {
+            currentState = states[clickCount % states.length];
+            clickCount = clickCount + 1;
+        })
+
+        let positionIndex = 0
+        const moveForward = (positions, rotations) => {
+            if (positionIndex !== positions.length) {
+                const camera_el = document.getElementById("curve-camera");
+                let position = positions[positionIndex];
+                let rotation = rotations[positionIndex];
+                camera_el.setAttribute("position", position);
+                // camera_el.setAttribute("rotation", rotation);
+                positionIndex = positionIndex + 1;
+            }
+        }
+
+        const moveBackward = (positions, rotations) => {
+            if (positionIndex !== 0) {
+                const camera_el = document.getElementById("curve-camera");
+                let position = positions[positionIndex];
+                let rotation = rotations[positionIndex];
+                camera_el.setAttribute("position", position);
+                // camera_el.setAttribute("rotation", rotation);
+                positionIndex = positionIndex - 1;
+            }
+        }
+
+        const moveCamera = async () => {
+            const [positions, forward_rotations, backward_rotations] = await getCameraTrajectory();
+            setInterval(() => {
+                console.log(currentState);
+                if (currentState === "forward") {
+                    moveForward(positions, forward_rotations);
+                }
+                else if (currentState === "backward") {
+                    moveBackward(positions, backward_rotations);
+                }
+            }, 300);
+        }
+
+        moveCamera();
+    </script>
+  </body>
+</html>
