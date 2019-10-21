@@ -1,8 +1,22 @@
 ## hackseq19 - TEAM 15: Virtual and Augmented Reality for Single-Cell Data Exploration.*
 
-## Project Description
-
 ### Final product website: http://www.singlecellvr.com
+
+
+![http://www.singlecellvr.com](images/SCVR_logo.png)
+
+![http://www.singlecellvr.com](images/scvr.jpeg)
+
+**NOTE**:  VR Headset device required. <a href = 'https://arvr.google.com/cardboard/'>Google Cardboard</a> is currently the primarily supported headset for this data visualization software.
+
+### Directions
+**Step 1**: Upload your single cell trajectory data in .csv format - this is the default product of the <a href = 'http://stream.pinellolab.partners.org/'>STREAM</a> web tool. singlecellvr.com converts this data into a format built for the VR visualization space. (*example data pre-loaded in this vignette*).
+
+**Step 2**: Click the link *on your mobile device* to open the VR space and explore your data.
+
+**Step 3**: Interact with your data by using the signature *Google Cardboard*  one-button interface.
+
+## Notes on production and Project Description
 
 ### Goal / Vision:
 - Visualize high-tech single-cell RNA-seq experiments at a life-size scale in 3-D
@@ -15,10 +29,10 @@
 ### How are we visualizing this?
 - We are writing a suite of virtual reality software that is accessible to the user from our website, www.singlecellvr.com.
 
-#### Team Leads: Michael Vinyard, Luca Pinello, PhD
+#### Team Leads: Michael Vinyard (@vinyard_m) & Luca Pinello ( @lucapinello & pinellolab.org)
 
 #### Team Members:
-- Huidong Chen
+- Huidong Chen 
 - Michelle Crown
 - Alexander Dungate
 - Fatih Karaoglanoglu
@@ -27,16 +41,3 @@
 - Sepand Dyanatkar Motaghed
 - Mehul Sharma
 - David Stein
-
-#### Useful links (for team use):
-1. Team 15 Github Repo: https://github.com/hackseq/hs19-var
-2. A-FRAME: https://aframe.io
-3. The following options for 3-D scatterplot implementations
-
-    A. https://www.npmjs.com/package/aframe-scatterplot  
-    B. https://github.com/bryik/aframe-scatter-component  
-    C. https://github.com/zcanter/aframe-scatterplot
-  
-4. STREAM Paper (open access): https://www.nature.com/articles/s41467-019-09670-4
-
-5. STREAM website: http://stream.pinellolab.partners.org/
