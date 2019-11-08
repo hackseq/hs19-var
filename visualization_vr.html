@@ -151,6 +151,11 @@
             clickCount = clickCount + 1;
         })
 
+        AFRAME.scenes[0].canvas.addEventListener("click", () => {
+            currentState = states[clickCount % states.length];
+            clickCount = clickCount + 1;
+        })
+
         let positionIndex = 0
         const moveForward = (positions, rotations) => {
             if (positionIndex !== positions.length) {
